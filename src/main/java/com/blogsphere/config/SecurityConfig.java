@@ -27,7 +27,20 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+            	// Public endpoints
+                .requestMatchers(
+                		"/api/auth/**",
+                		"/api/blogs",
+                		"/api/blogs/{id}"
+                ).permitAll()
+                
+                /* Authenticated endpoints
+                .requestMatchers(
+                    "/api/blogs/my-blogs",
+                    "/api/blogs/**"
+                ).authenticated() */
+                
+                // All other requests
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
