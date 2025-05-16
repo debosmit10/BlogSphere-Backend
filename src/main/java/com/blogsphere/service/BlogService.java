@@ -23,14 +23,22 @@ public class BlogService {
 
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService; // NEW
 
     public BlogResponse createBlog(BlogRequest request, String username) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
+        
+        // NEW
+        String imageUrl = null;
+        if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
+            imageUrl = fileStorageService.storeFile(request.getImageFile());
+        }
+        
         Blog blog = Blog.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
+                .imageUrl(imageUrl)
                 .author(author)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -71,8 +79,22 @@ public class BlogService {
 
         blog.setTitle(request.getTitle());
         blog.setContent(request.getContent());
-        Blog updatedBlog = blogRepository.save(blog);
         
+        // Handle image update
+        if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
+            try {
+                // Delete old image if exists
+                if (blog.getImageUrl() != null) {
+                    fileStorageService.deleteFile(blog.getImageUrl());
+                }
+                // Store new image
+                blog.setImageUrl(fileStorageService.storeFile(request.getImageFile()));
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Failed to update image: " + e.getMessage());
+            }
+        }
+        
+        Blog updatedBlog = blogRepository.save(blog);
         return mapToBlogResponse(updatedBlog);
     }
 
@@ -84,6 +106,11 @@ public class BlogService {
         if (!blog.getAuthor().getUsername().equals(userDetails.getUsername())) {
             throw new RuntimeException("You are not authorized to delete this blog");
         }
+        
+        // Delete associated image if exists
+        if (blog.getImageUrl() != null) {
+            fileStorageService.deleteFile(blog.getImageUrl());
+        }
 
         blogRepository.delete(blog);
     }
@@ -93,6 +120,7 @@ public class BlogService {
                 .id(blog.getId())
                 .title(blog.getTitle())
                 .content(blog.getContent())
+                .imageUrl(blog.getImageUrl())
                 .createdAt(blog.getCreatedAt())
                 .authorName(blog.getAuthor().getName())
                 .authorUsername(blog.getAuthor().getUsername())

@@ -2,11 +2,13 @@ package com.blogsphere.controller;
 
 import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,9 +29,9 @@ public class BlogController {
 
     private final BlogService blogService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponse> createBlog(
-            @RequestBody BlogRequest request,
+    		@ModelAttribute BlogRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(blogService.createBlog(request, userDetails.getUsername()));
     }
@@ -50,10 +52,10 @@ public class BlogController {
         return ResponseEntity.ok(blogService.getBlogsByUser(userDetails.getUsername()));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponse> updateBlog(
             @PathVariable Long id,
-            @RequestBody BlogRequest request,
+            @ModelAttribute BlogRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(blogService.updateBlog(id, request, userDetails));
     }
