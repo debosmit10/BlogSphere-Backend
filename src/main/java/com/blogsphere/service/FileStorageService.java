@@ -17,25 +17,39 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileStorageService {
  
- private final Path rootLocation;
+	private final Path blogImagesLocation;
+    private final Path profilePicturesLocation;
  
  public FileStorageService(@Value("${file.upload-dir}") String uploadDir) {
-     this.rootLocation = Paths.get(uploadDir);
+	 
+	 // Initialize directories
+     this.blogImagesLocation = Paths.get(uploadDir, "blog-images").toAbsolutePath().normalize();
+     this.profilePicturesLocation = Paths.get(uploadDir, "profile-pictures").toAbsolutePath().normalize();
+     
      try {
-         Files.createDirectories(rootLocation);
+    	 Files.createDirectories(blogImagesLocation);
+         Files.createDirectories(profilePicturesLocation);
      } catch (IOException e) {
-         throw new RuntimeException("Could not initialize storage", e);
+         throw new RuntimeException("Could not initialize storage directories", e);
      }
  }
  
- public String storeFile(MultipartFile file) {
+ public String storeBlogImage(MultipartFile file) {
+     return storeFile(file, blogImagesLocation);
+ }
+
+ public String storeProfilePicture(MultipartFile file) {
+     return storeFile(file, profilePicturesLocation);
+ }
+ 
+ public String storeFile(MultipartFile file, Path location) {
      try {
          if (file.isEmpty()) {
              throw new RuntimeException("Failed to store empty file");
          }
          
-         String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-         Path destinationFile = this.rootLocation.resolve(filename)
+         String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();	// File name generated here
+         Path destinationFile = location.resolve(filename)
              .normalize()
              .toAbsolutePath();
          
@@ -46,9 +60,17 @@ public class FileStorageService {
      }
  }
  
- public Resource loadFile(String filename) {
+ public Resource loadBlogImage(String filename) {
+     return loadFile(filename, blogImagesLocation);
+ }
+
+ public Resource loadProfilePicture(String filename) {
+     return loadFile(filename, profilePicturesLocation);
+ }
+ 
+ public Resource loadFile(String filename, Path location) {
      try {
-         Path file = rootLocation.resolve(filename);
+         Path file = location.resolve(filename);
          Resource resource = new UrlResource(file.toUri());
          
          if (resource.exists() || resource.isReadable()) {
@@ -61,9 +83,17 @@ public class FileStorageService {
      }
  }
  
- public void deleteFile(String filename) {
+ public void deleteBlogImage(String filename) {
+     deleteFile(filename, blogImagesLocation);
+ }
+
+ public void deleteProfilePicture(String filename) {
+     deleteFile(filename, profilePicturesLocation);
+ }
+ 
+ public void deleteFile(String filename, Path location) {
 	    try {
-	        Path file = rootLocation.resolve(filename);
+	        Path file = location.resolve(filename);
 	        Files.deleteIfExists(file);
 	    } catch (IOException e) {
 	        throw new RuntimeException("Failed to delete file: " + filename, e);

@@ -32,7 +32,7 @@ public class BlogService {
         // NEW
         String imageUrl = null;
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
-            imageUrl = fileStorageService.storeFile(request.getImageFile());
+            imageUrl = fileStorageService.storeBlogImage(request.getImageFile());
         }
         
         Blog blog = Blog.builder()
@@ -85,10 +85,10 @@ public class BlogService {
             try {
                 // Delete old image if exists
                 if (blog.getImageUrl() != null) {
-                    fileStorageService.deleteFile(blog.getImageUrl());
+                    fileStorageService.deleteBlogImage(blog.getImageUrl());
                 }
                 // Store new image
-                blog.setImageUrl(fileStorageService.storeFile(request.getImageFile()));
+                blog.setImageUrl(fileStorageService.storeBlogImage(request.getImageFile()));
             } catch (RuntimeException e) {
                 throw new RuntimeException("Failed to update image: " + e.getMessage());
             }
@@ -109,7 +109,7 @@ public class BlogService {
         
         // Delete associated image if exists
         if (blog.getImageUrl() != null) {
-            fileStorageService.deleteFile(blog.getImageUrl());
+            fileStorageService.deleteBlogImage(blog.getImageUrl());
         }
 
         blogRepository.delete(blog);

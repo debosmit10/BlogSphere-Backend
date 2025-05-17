@@ -19,11 +19,19 @@ public class FileController {
  
  private final FileStorageService fileStorageService;
  
- @GetMapping("/{filename:.+}")
- public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-     Resource file = fileStorageService.loadFile(filename);
+ @GetMapping("/blog-images/{filename:.+}")
+ public ResponseEntity<Resource> serveBlogImage(@PathVariable String filename) {
+     Resource file = fileStorageService.loadBlogImage(filename);
      return ResponseEntity.ok()
-             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
+             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+             .body(file);
+ }
+
+ @GetMapping("/profile-pictures/{filename:.+}")
+ public ResponseEntity<Resource> serveProfilePicture(@PathVariable String filename) {
+     Resource file = fileStorageService.loadProfilePicture(filename);
+     return ResponseEntity.ok()
+             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
              .body(file);
  }
 }
