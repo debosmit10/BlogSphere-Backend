@@ -1,5 +1,6 @@
 package com.blogsphere.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -99,6 +100,8 @@ public class FileStorageService {
  }
  
  // ========== PRIVATE HELPER METHODS ========== //
+ 
+ 
  public String storeFile(MultipartFile file, Path location, String expectedContentType) {
      try {
     	 // Validate file
@@ -146,6 +149,15 @@ public class FileStorageService {
 	        Files.deleteIfExists(file);
 	    } catch (IOException e) {
 	        throw new RuntimeException("Failed to delete file: " + filename, e);
+	    }
+	}
+ 
+ public File getFile(String filename, Path location) {
+	    try {
+	        Path filePath = location.resolve(filename).normalize();
+	        return filePath.toFile();
+	    } catch (Exception e) {
+	        throw new RuntimeException("Could not access file: " + filename, e);
 	    }
 	}
 }

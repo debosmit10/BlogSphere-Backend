@@ -124,6 +124,7 @@ public class BlogService {
                 .createdAt(blog.getCreatedAt())
                 .authorName(blog.getAuthor().getName())
                 .authorUsername(blog.getAuthor().getUsername())
+                .authorProfilePictureUrl(blog.getAuthor().getProfilePictureUrl())
                 .build();
     }
 }

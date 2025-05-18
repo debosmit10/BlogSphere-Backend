@@ -19,4 +19,5 @@ public class BlogResponse {
     private LocalDateTime createdAt;
     private String authorName;
     private String authorUsername;
+    private String authorProfilePictureUrl;
 }
