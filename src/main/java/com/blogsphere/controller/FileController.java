@@ -29,9 +29,26 @@ public class FileController {
 
  @GetMapping("/profile-pictures/{filename:.+}")
  public ResponseEntity<Resource> serveProfilePicture(@PathVariable String filename) {
-     Resource file = fileStorageService.loadProfilePicture(filename);
-     return ResponseEntity.ok()
-             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+     Resource file;
+     
+     try {
+         if (filename.equals("default.jpg")) {
+             file = fileStorageService.loadDefaultProfilePicture();
+         } else {
+             file = fileStorageService.loadProfilePicture(filename);
+         }
+         
+         return ResponseEntity.ok()
+             .header(HttpHeaders.CONTENT_DISPOSITION, 
+                    "inline; filename=\"" + file.getFilename() + "\"")
              .body(file);
+     } catch (RuntimeException e) {
+         // Fallback to default if image not found
+         file = fileStorageService.loadDefaultProfilePicture();
+         return ResponseEntity.ok()
+             .header(HttpHeaders.CONTENT_DISPOSITION, 
+                    "inline; filename=\"default.jpg\"")
+             .body(file);
+     }
  }
 }
