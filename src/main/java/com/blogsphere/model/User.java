@@ -42,6 +42,10 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 
+	@Column(name = "profile_picture_url", nullable = false)
+	@Builder.Default
+    private String profilePictureUrl = "default.jpg";;
+	
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
