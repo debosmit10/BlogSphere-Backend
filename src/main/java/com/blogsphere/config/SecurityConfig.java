@@ -31,30 +31,57 @@ public class SecurityConfig {
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+        	// Disable CSRF for stateless API
             .csrf(AbstractHttpConfigurer::disable)
+            
+            // Enable CORS with default configuration
             .cors(Customizer.withDefaults())
+            
+            // Configure authorization rules
             .authorizeHttpRequests(auth -> auth
             	// Public endpoints
                 .requestMatchers(
-                		"/api/auth/**",
-                		"/api/blogs",
-                		"/api/blogs/{id}"
+                		"/api/auth/**",          // Authentication endpoints
+                        "/api/blogs",            // Get all blogs
+                        "/api/blogs/{id}",       // Get single blog
+                        "/api/files/**",         // File access endpoints
+                        "/api/users/*/profile"   // User profile access
                 ).permitAll()
                 
-                /* Authenticated endpoints
+                // Authenticated endpoints
                 .requestMatchers(
-                    "/api/blogs/my-blogs",
-                    "/api/blogs/**"
-                ).authenticated() */
+                    "/api/blogs/my-blogs",   	// User's blogs
+                    "/api/blogs/**"          	// All other blog operations
+                ).authenticated()
                 
-                // All other requests
+                // All other requests require authentication
                 .anyRequest().authenticated()
             )
+            
+            // Set session management to stateless
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            
+            // Add JWT filter before the username/password filter
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }
+	
+		// CORS configuration
+		@Bean
+		public CorsConfigurationSource corsConfigurationSource() {
+		    CorsConfiguration configuration = new CorsConfiguration();
+		    configuration.setAllowedOrigins(List.of("http://localhost:5173"));	// Allowed origins
+		    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));	// Allowed HTTP methods
+		    configuration.setAllowedHeaders(List.of("*"));		// Allowed headers
+		    configuration.setExposedHeaders(List.of("Authorization"));
+		    configuration.setAllowCredentials(true);	// Allow credentials (for cookies/auth headers)
+
+		    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		    // Apply CORS config to all paths
+		    source.registerCorsConfiguration("/**", configuration);
+		    return source;
+		}
 	
 	@Bean
     public PasswordEncoder passwordEncoder() {
@@ -65,18 +92,4 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-	
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-	    CorsConfiguration configuration = new CorsConfiguration();
-	    configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-	    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-	    configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
-	    configuration.setExposedHeaders(List.of("Authorization"));
-	    configuration.setAllowCredentials(true); // if using cookies or Authorization header
-
-	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	    source.registerCorsConfiguration("/**", configuration);
-	    return source;
-	}
 }

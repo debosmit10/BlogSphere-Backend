@@ -34,6 +34,9 @@ public class Blog {
 
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
+	
+	@Column(name = "image_url")
+    private String imageUrl;
 
 	@ManyToOne
 	@JoinColumn(name = "author_id")
