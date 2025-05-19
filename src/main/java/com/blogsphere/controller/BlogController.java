@@ -1,11 +1,16 @@
 package com.blogsphere.controller;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,8 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.blogsphere.dto.BlogRequest;
 import com.blogsphere.dto.BlogResponse;
+import com.blogsphere.model.Topic;
 import com.blogsphere.service.BlogService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,10 +36,26 @@ public class BlogController {
     private final BlogService blogService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BlogResponse> createBlog(
-    		@ModelAttribute BlogRequest request,
+    public ResponseEntity<?> createBlog(
+            @Valid @ModelAttribute BlogRequest request,
+            BindingResult bindingResult,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(blogService.createBlog(request, userDetails.getUsername()));
+        
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors()
+                    .stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        try {
+            return ResponseEntity.ok(blogService.createBlog(request, userDetails.getUsername()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
@@ -43,6 +66,22 @@ public class BlogController {
     @GetMapping
     public ResponseEntity<List<BlogResponse>> getAllBlogs() {
         return ResponseEntity.ok(blogService.getAllBlogs());
+    }
+    
+    @GetMapping("/topic/{topic}")
+    public ResponseEntity<List<BlogResponse>> getBlogsByTopic(@PathVariable Topic topic) {
+        return ResponseEntity.ok(blogService.getBlogsByTopic(topic));
+    }
+    
+    @GetMapping("/topics")		// Get all available topics
+    public ResponseEntity<List<Map<String, String>>> getAllTopics() {
+        List<Map<String, String>> topics = Arrays.stream(Topic.values())
+                .map(topic -> Map.of(
+                        "name", topic.name(),
+                        "displayName", topic.getDisplayName()
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(topics);
     }
 
     @GetMapping("/my-blogs")

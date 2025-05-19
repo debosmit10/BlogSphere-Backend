@@ -44,6 +44,8 @@ public class SecurityConfig {
                 		"/api/auth/**",          // Authentication endpoints
                         "/api/blogs",            // Get all blogs
                         "/api/blogs/{id}",       // Get single blog
+                        "/api/blogs/topic/**",   // Get specific topic blogs
+                        "/api/blogs/topics",	 // Get all topics
                         "/api/files/**",         // File access endpoints
                         "/api/users/*/profile"   // User profile access
                 ).permitAll()
