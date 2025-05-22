@@ -11,6 +11,7 @@ import com.blogsphere.dto.BlogRequest;
 import com.blogsphere.dto.BlogResponse;
 import com.blogsphere.exception.ResourceNotFoundException;
 import com.blogsphere.model.Blog;
+import com.blogsphere.model.Topic;
 import com.blogsphere.model.User;
 import com.blogsphere.repository.BlogRepository;
 import com.blogsphere.repository.UserRepository;
@@ -29,7 +30,14 @@ public class BlogService {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         
-        // NEW
+        // Convert topic string to enum
+        Topic topic;
+        try {
+            topic = Topic.valueOf(request.getTopic().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid topic: " + request.getTopic());
+        }
+        
         String imageUrl = null;
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
             imageUrl = fileStorageService.storeBlogImage(request.getImageFile());
@@ -38,6 +46,7 @@ public class BlogService {
         Blog blog = Blog.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
+                .topic(topic) // Convert to enum here
                 .imageUrl(imageUrl)
                 .author(author)
                 .createdAt(LocalDateTime.now())
@@ -120,11 +129,19 @@ public class BlogService {
                 .id(blog.getId())
                 .title(blog.getTitle())
                 .content(blog.getContent())
+                .topic(blog.getTopic())
+                .topicDisplayName(blog.getTopic().getDisplayName())
                 .imageUrl(blog.getImageUrl())
                 .createdAt(blog.getCreatedAt())
                 .authorName(blog.getAuthor().getName())
                 .authorUsername(blog.getAuthor().getUsername())
                 .authorProfilePictureUrl(blog.getAuthor().getProfilePictureUrl())
                 .build();
+    }
+    
+    public List<BlogResponse> getBlogsByTopic(Topic topic) {
+        return blogRepository.findByTopic(topic).stream()
+                .map(this::mapToBlogResponse)
+                .collect(Collectors.toList());
     }
 }

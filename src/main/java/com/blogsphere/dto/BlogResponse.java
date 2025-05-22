@@ -2,6 +2,8 @@ package com.blogsphere.dto;
 
 import java.time.LocalDateTime;
 
+import com.blogsphere.model.Topic;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +22,6 @@ public class BlogResponse {
     private String authorName;
     private String authorUsername;
     private String authorProfilePictureUrl;
+    private Topic topic;
+    private String topicDisplayName;  // For frontend to display
 }
