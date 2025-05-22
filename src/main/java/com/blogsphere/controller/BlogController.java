@@ -59,21 +59,29 @@ public class BlogController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BlogResponse> getBlogById(@PathVariable Long id) {
-        return ResponseEntity.ok(blogService.getBlogById(id));
+    public ResponseEntity<BlogResponse> getBlogById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        return ResponseEntity.ok(blogService.getBlogById(id, username));
     }
 
     @GetMapping
-    public ResponseEntity<List<BlogResponse>> getAllBlogs() {
-        return ResponseEntity.ok(blogService.getAllBlogs());
+    public ResponseEntity<List<BlogResponse>> getAllBlogs(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        return ResponseEntity.ok(blogService.getAllBlogs(username));
     }
     
     @GetMapping("/topic/{topic}")
-    public ResponseEntity<List<BlogResponse>> getBlogsByTopic(@PathVariable Topic topic) {
-        return ResponseEntity.ok(blogService.getBlogsByTopic(topic));
+    public ResponseEntity<List<BlogResponse>> getBlogsByTopic(
+            @PathVariable Topic topic,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        return ResponseEntity.ok(blogService.getBlogsByTopic(topic, username));
     }
     
-    @GetMapping("/topics")		// Get all available topics
+    @GetMapping("/topics")
     public ResponseEntity<List<Map<String, String>>> getAllTopics() {
         List<Map<String, String>> topics = Arrays.stream(Topic.values())
                 .map(topic -> Map.of(
@@ -87,7 +95,10 @@ public class BlogController {
     @GetMapping("/my-blogs")
     public ResponseEntity<List<BlogResponse>> getUserBlogs(
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(blogService.getBlogsByUser(userDetails.getUsername()));
+        return ResponseEntity.ok(blogService.getBlogsByUser(
+            userDetails.getUsername(), 
+            userDetails.getUsername()
+        ));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
