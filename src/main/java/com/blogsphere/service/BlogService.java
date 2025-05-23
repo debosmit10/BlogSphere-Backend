@@ -24,7 +24,8 @@ public class BlogService {
 
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
-    private final FileStorageService fileStorageService; // NEW
+    private final FileStorageService fileStorageService;
+    private final LikeService likeService;
 
     public BlogResponse createBlog(BlogRequest request, String username) {
         User author = userRepository.findByUsername(username)
@@ -53,27 +54,27 @@ public class BlogService {
                 .build();
 
         Blog savedBlog = blogRepository.save(blog);
-        return mapToBlogResponse(savedBlog);
+        return mapToBlogResponse(savedBlog, username);
     }
 
-    public BlogResponse getBlogById(Long id) {
+    public BlogResponse getBlogById(Long id, String currentUsername) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog not found with id: " + id));
-        return mapToBlogResponse(blog);
+        return mapToBlogResponse(blog, currentUsername);
     }
 
-    public List<BlogResponse> getAllBlogs() {
+    public List<BlogResponse> getAllBlogs(String currentUsername) {
         return blogRepository.findAll().stream()
-                .map(this::mapToBlogResponse)
+        		.map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }
 
-    public List<BlogResponse> getBlogsByUser(String username) {
+    public List<BlogResponse> getBlogsByUser(String username, String currentUsername) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         
         return blogRepository.findByAuthorId(author.getId()).stream()
-                .map(this::mapToBlogResponse)
+        		.map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }
 
@@ -81,7 +82,6 @@ public class BlogService {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog not found with id: " + id));
 
-        // Check if the current user is the author
         if (!blog.getAuthor().getUsername().equals(userDetails.getUsername())) {
             throw new RuntimeException("You are not authorized to update this blog");
         }
@@ -89,14 +89,11 @@ public class BlogService {
         blog.setTitle(request.getTitle());
         blog.setContent(request.getContent());
         
-        // Handle image update
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
             try {
-                // Delete old image if exists
                 if (blog.getImageUrl() != null) {
                     fileStorageService.deleteBlogImage(blog.getImageUrl());
                 }
-                // Store new image
                 blog.setImageUrl(fileStorageService.storeBlogImage(request.getImageFile()));
             } catch (RuntimeException e) {
                 throw new RuntimeException("Failed to update image: " + e.getMessage());
@@ -104,19 +101,17 @@ public class BlogService {
         }
         
         Blog updatedBlog = blogRepository.save(blog);
-        return mapToBlogResponse(updatedBlog);
+        return mapToBlogResponse(updatedBlog, userDetails.getUsername());
     }
 
     public void deleteBlog(Long id, UserDetails userDetails) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog not found with id: " + id));
 
-        // Check if the current user is the author
         if (!blog.getAuthor().getUsername().equals(userDetails.getUsername())) {
             throw new RuntimeException("You are not authorized to delete this blog");
         }
         
-        // Delete associated image if exists
         if (blog.getImageUrl() != null) {
             fileStorageService.deleteBlogImage(blog.getImageUrl());
         }
@@ -124,7 +119,10 @@ public class BlogService {
         blogRepository.delete(blog);
     }
 
-    private BlogResponse mapToBlogResponse(Blog blog) {
+    private BlogResponse mapToBlogResponse(Blog blog, String currentUsername) {
+        boolean isLiked = currentUsername != null && 
+            likeService.hasUserLikedBlog(blog.getId(), currentUsername);
+        
         return BlogResponse.builder()
                 .id(blog.getId())
                 .title(blog.getTitle())
@@ -136,12 +134,14 @@ public class BlogService {
                 .authorName(blog.getAuthor().getName())
                 .authorUsername(blog.getAuthor().getUsername())
                 .authorProfilePictureUrl(blog.getAuthor().getProfilePictureUrl())
+                .likeCount(likeService.getLikeCount(blog.getId()))
+                .isLikedByCurrentUser(isLiked)
                 .build();
     }
     
-    public List<BlogResponse> getBlogsByTopic(Topic topic) {
+    public List<BlogResponse> getBlogsByTopic(Topic topic, String currentUsername) {
         return blogRepository.findByTopic(topic).stream()
-                .map(this::mapToBlogResponse)
+                .map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }
 }

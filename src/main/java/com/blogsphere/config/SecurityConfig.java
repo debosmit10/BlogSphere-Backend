@@ -52,8 +52,9 @@ public class SecurityConfig {
                 
                 // Authenticated endpoints
                 .requestMatchers(
-                    "/api/blogs/my-blogs",   	// User's blogs
-                    "/api/blogs/**"          	// All other blog operations
+                		"/api/blogs/my-blogs",   // User's blogs
+                		"/api/blogs/**",         // All other blog operations
+                		"/api/blogs/*/likes/**"
                 ).authenticated()
                 
                 // All other requests require authentication
