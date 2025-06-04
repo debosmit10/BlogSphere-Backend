@@ -25,5 +25,6 @@ public class BlogResponse {
     private String authorUsername;
     private String authorProfilePictureUrl;
     private Topic topic;
-    private String topicDisplayName;  // For frontend to display
+    private String topicDisplayName;
+    private boolean isSavedByCurrentUser;
 }
