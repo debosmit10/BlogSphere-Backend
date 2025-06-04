@@ -14,6 +14,7 @@ import com.blogsphere.model.Blog;
 import com.blogsphere.model.Topic;
 import com.blogsphere.model.User;
 import com.blogsphere.repository.BlogRepository;
+import com.blogsphere.repository.SavedBlogRepository;
 import com.blogsphere.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class BlogService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final LikeService likeService;
+    private final SavedBlogRepository savedBlogRepository;
 
     public BlogResponse createBlog(BlogRequest request, String username) {
         User author = userRepository.findByUsername(username)
@@ -119,10 +121,22 @@ public class BlogService {
         blogRepository.delete(blog);
     }
 
-    private BlogResponse mapToBlogResponse(Blog blog, String currentUsername) {
-        boolean isLiked = currentUsername != null && 
-            likeService.hasUserLikedBlog(blog.getId(), currentUsername);
+    public BlogResponse mapToBlogResponse(Blog blog, String currentUsername) {
+//        boolean isLiked = currentUsername != null && 
+//            likeService.hasUserLikedBlog(blog.getId(), currentUsername);
         
+    	boolean isLiked = false;
+        boolean isSaved = false;
+        
+        if (currentUsername != null) {
+            User currentUser = userRepository.findByUsername(currentUsername).orElse(null);
+            if (currentUser != null) {
+                isLiked = likeService.hasUserLikedBlog(blog.getId(), currentUsername);
+                // Check saved status using injected SavedBlogRepository
+                isSaved = savedBlogRepository.existsByUserAndBlog(currentUser, blog);
+            }
+        }
+    	
         return BlogResponse.builder()
                 .id(blog.getId())
                 .title(blog.getTitle())
@@ -136,6 +150,7 @@ public class BlogService {
                 .authorProfilePictureUrl(blog.getAuthor().getProfilePictureUrl())
                 .likeCount(likeService.getLikeCount(blog.getId()))
                 .isLikedByCurrentUser(isLiked)
+                .isSavedByCurrentUser(isSaved)
                 .build();
     }
     
