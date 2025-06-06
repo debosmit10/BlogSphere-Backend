@@ -77,6 +77,7 @@ public class AuthenticationService {
             .name(user.getName())
             .email(user.getEmail())
             .role(user.getRole())
+            .profilePictureUrl(user.getProfilePictureUrl())
             .build();
     }
 }
