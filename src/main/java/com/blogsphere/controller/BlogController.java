@@ -100,6 +100,14 @@ public class BlogController {
             userDetails.getUsername()
         ));
     }
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<BlogResponse>> getBlogsByUserId(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        return ResponseEntity.ok(blogService.getBlogsByUserId(userId, username));
+    }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponse> updateBlog(

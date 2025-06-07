@@ -61,6 +61,8 @@ public class UserService {
              .email(user.getEmail())
              .profilePictureUrl(user.getProfilePictureUrl())
              .role(user.getRole())
+             .followers(0) // Placeholder for now
+             .following(0) // Placeholder for now
              .build();
  }
 }
