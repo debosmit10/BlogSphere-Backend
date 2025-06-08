@@ -48,14 +48,20 @@ public class SecurityConfig {
                         "/api/blogs/topic/**",   // Get specific topic blogs
                         "/api/blogs/topics",	 // Get all topics
                         "/api/files/**",         // File access endpoints
-                        "/api/users/*/profile"   // User profile access
+                        "/api/users/*/profile",   // User profile access
+                        "/api/comments/blogs/**", // Get comments by blog ID
+                        "/api/comment-likes/*/count", // Get comment like count
+                        "/api/comment-likes/*/status/users/**" // Get comment like status
                 ).permitAll()
                 
                 // Authenticated endpoints
                 .requestMatchers(
                 		"/api/blogs/my-blogs",   // User's blogs
                 		//"/api/blogs/**",         // All other blog operations
-                		"/api/blogs/*/likes/**"
+                		"/api/blogs/*/likes/**",
+                		"/api/comments/blogs/*/users/**", // Create comment
+                        "/api/comments/*/users/**", // Delete comment
+                        "/api/comment-likes/*/users/**" // Toggle comment like
                 ).authenticated()
                 
                 // All other requests require authentication
