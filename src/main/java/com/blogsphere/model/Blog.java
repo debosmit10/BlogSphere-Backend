@@ -67,4 +67,7 @@ public class Blog {
 	
 //	@OneToMany(mappedBy = "post")
 //    private List<Comment> comments;
+    
+    @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 }
