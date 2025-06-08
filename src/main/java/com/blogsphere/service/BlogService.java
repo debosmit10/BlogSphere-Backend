@@ -79,6 +79,15 @@ public class BlogService {
         		.map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }
+    
+    public List<BlogResponse> getBlogsByUserId(Long userId, String currentUsername) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<Blog> blogs = blogRepository.findByAuthor(user);
+        return blogs.stream()
+                .map(blog -> mapToBlogResponse(blog, currentUsername))
+                .collect(Collectors.toList());
+    }
 
     public BlogResponse updateBlog(Long id, BlogRequest request, UserDetails userDetails) {
         Blog blog = blogRepository.findById(id)
@@ -145,6 +154,7 @@ public class BlogService {
                 .topicDisplayName(blog.getTopic().getDisplayName())
                 .imageUrl(blog.getImageUrl())
                 .createdAt(blog.getCreatedAt())
+                .authorId(blog.getAuthor().getId())
                 .authorName(blog.getAuthor().getName())
                 .authorUsername(blog.getAuthor().getUsername())
                 .authorProfilePictureUrl(blog.getAuthor().getProfilePictureUrl())

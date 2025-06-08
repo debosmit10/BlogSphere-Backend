@@ -21,6 +21,7 @@ public class BlogResponse {
     private LocalDateTime createdAt;
     private int likeCount;
     private boolean isLikedByCurrentUser;
+    private Long authorId;
     private String authorName;
     private String authorUsername;
     private String authorProfilePictureUrl;

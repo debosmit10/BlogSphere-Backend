@@ -44,6 +44,7 @@ public class SecurityConfig {
                 		"/api/auth/**",          // Authentication endpoints
                         "/api/blogs",            // Get all blogs
                         "/api/blogs/{id}",       // Get single blog
+                        "/api/blogs/user/**",     // Get user's blogs
                         "/api/blogs/topic/**",   // Get specific topic blogs
                         "/api/blogs/topics",	 // Get all topics
                         "/api/files/**",         // File access endpoints
@@ -53,7 +54,7 @@ public class SecurityConfig {
                 // Authenticated endpoints
                 .requestMatchers(
                 		"/api/blogs/my-blogs",   // User's blogs
-                		"/api/blogs/**",         // All other blog operations
+                		//"/api/blogs/**",         // All other blog operations
                 		"/api/blogs/*/likes/**"
                 ).authenticated()
                 
