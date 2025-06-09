@@ -29,6 +29,7 @@ public class BlogService {
     private final LikeService likeService;
     private final SavedBlogRepository savedBlogRepository;
     private final FollowService followService;
+    private final VisitedBlogService visitedBlogService;
 
     public BlogResponse createBlog(BlogRequest request, String username) {
         User author = userRepository.findByUsername(username)
@@ -180,6 +181,13 @@ public class BlogService {
         return followingUsers.stream()
                 .flatMap(followedUser -> blogRepository.findByAuthor(followedUser).stream())
                 .map(blog -> mapToBlogResponse(blog, currentUsername))
+                .collect(Collectors.toList());
+    }
+    
+    public List<BlogResponse> getRecentlyVisitedBlogs(Long userId, String currentUsername) {
+        return visitedBlogService.getRecentlyVisitedBlogs(userId).stream()
+                .limit(3)
+                .map(visitedBlog -> mapToBlogResponse(visitedBlog.getBlog(), currentUsername))
                 .collect(Collectors.toList());
     }
 }
