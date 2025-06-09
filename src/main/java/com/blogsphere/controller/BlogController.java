@@ -143,7 +143,14 @@ public class BlogController {
         String username = userDetails != null ? userDetails.getUsername() : null;
         return ResponseEntity.ok(blogService.getBlogsFromFollowedUsers(username));
     }
-    
+
+    @GetMapping("/top-liked-weekly")
+    public ResponseEntity<List<BlogResponse>> getTopLikedBlogsOfWeek(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        return ResponseEntity.ok(blogService.getTopLikedBlogsOfWeek(username));
+    }
+
     @GetMapping("/recently-visited")
     public ResponseEntity<List<BlogResponse>> getRecentlyVisitedBlogs(
             @AuthenticationPrincipal UserDetails userDetails) {

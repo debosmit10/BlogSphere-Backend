@@ -183,7 +183,14 @@ public class BlogService {
                 .map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }
-    
+
+    public List<BlogResponse> getTopLikedBlogsOfWeek(String currentUsername) {
+    	LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        return blogRepository.findTopBlogsByLikes(sevenDaysAgo, org.springframework.data.domain.PageRequest.of(0, 3)).stream()
+                .map(blog -> mapToBlogResponse(blog, currentUsername))
+                .collect(Collectors.toList());
+    }
+  
     public List<BlogResponse> getRecentlyVisitedBlogs(Long userId, String currentUsername) {
         return visitedBlogService.getRecentlyVisitedBlogs(userId).stream()
                 .limit(3)
