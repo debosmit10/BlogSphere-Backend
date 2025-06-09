@@ -12,4 +12,5 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 	List<Blog> findByAuthorId(Long authorId);
 	List<Blog> findByTopic(Topic topic);
 	List<Blog> findByAuthor(User author);
+	long countByCreatedAtAfter(java.time.LocalDateTime dateTime);
 }
