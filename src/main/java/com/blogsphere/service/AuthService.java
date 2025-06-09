@@ -30,6 +30,12 @@ public class AuthService {
 
         User saved = userRepository.save(user);
 
-        return new UserResponseDTO(saved.getId(), saved.getName(), saved.getUsername(), saved.getEmail());
+        return UserResponseDTO.builder()
+                .id(saved.getId())
+                .name(saved.getName())
+                .username(saved.getUsername())
+                .email(saved.getEmail())
+                .role(saved.getRole())
+                .build();
     }
 }

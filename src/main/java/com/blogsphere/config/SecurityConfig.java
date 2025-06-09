@@ -66,6 +66,11 @@ public class SecurityConfig {
                         "/api/follows/{followerId}/following/{followingId}" // Toggle follow
                 ).authenticated()
                 
+                // Admin endpoints
+                .requestMatchers(
+                        "/api/admin/**"
+                ).hasRole("ADMIN")
+                
                 // All other requests require authentication
                 .anyRequest().authenticated()
             )
