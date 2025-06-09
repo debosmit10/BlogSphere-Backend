@@ -51,7 +51,8 @@ public class SecurityConfig {
                         "/api/users/*/profile",   // User profile access
                         "/api/comments/blogs/**", // Get comments by blog ID
                         "/api/comment-likes/*/count", // Get comment like count
-                        "/api/comment-likes/*/status/users/**" // Get comment like status
+                        "/api/comment-likes/*/status/users/**", // Get comment like status
+                        "/api/follows/**" // Follow endpoints
                 ).permitAll()
                 
                 // Authenticated endpoints
@@ -61,7 +62,8 @@ public class SecurityConfig {
                 		"/api/blogs/*/likes/**",
                 		"/api/comments/blogs/*/users/**", // Create comment
                         "/api/comments/*/users/**", // Delete comment
-                        "/api/comment-likes/*/users/**" // Toggle comment like
+                        "/api/comment-likes/*/users/**", // Toggle comment like
+                        "/api/follows/{followerId}/following/{followingId}" // Toggle follow
                 ).authenticated()
                 
                 // All other requests require authentication

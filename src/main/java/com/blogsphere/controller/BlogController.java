@@ -124,4 +124,11 @@ public class BlogController {
         blogService.deleteBlog(id, userDetails);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/following")
+    public ResponseEntity<List<BlogResponse>> getBlogsFromFollowedUsers(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        return ResponseEntity.ok(blogService.getBlogsFromFollowedUsers(username));
+    }
 }

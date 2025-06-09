@@ -28,6 +28,7 @@ public class BlogService {
     private final FileStorageService fileStorageService;
     private final LikeService likeService;
     private final SavedBlogRepository savedBlogRepository;
+    private final FollowService followService;
 
     public BlogResponse createBlog(BlogRequest request, String username) {
         User author = userRepository.findByUsername(username)
@@ -166,6 +167,18 @@ public class BlogService {
     
     public List<BlogResponse> getBlogsByTopic(Topic topic, String currentUsername) {
         return blogRepository.findByTopic(topic).stream()
+                .map(blog -> mapToBlogResponse(blog, currentUsername))
+                .collect(Collectors.toList());
+    }
+    
+    public List<BlogResponse> getBlogsFromFollowedUsers(String currentUsername) {
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<User> followingUsers = followService.getFollowing(currentUser.getId());
+
+        return followingUsers.stream()
+                .flatMap(followedUser -> blogRepository.findByAuthor(followedUser).stream())
                 .map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }
