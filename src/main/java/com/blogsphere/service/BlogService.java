@@ -30,6 +30,7 @@ public class BlogService {
     private final SavedBlogRepository savedBlogRepository;
     private final FollowService followService;
     private final VisitedBlogService visitedBlogService;
+    private final CommentService commentService;
 
     public BlogResponse createBlog(BlogRequest request, String username) {
         User author = userRepository.findByUsername(username)
@@ -160,9 +161,11 @@ public class BlogService {
                 .authorName(blog.getAuthor().getName())
                 .authorUsername(blog.getAuthor().getUsername())
                 .authorProfilePictureUrl(blog.getAuthor().getProfilePictureUrl())
+                .authorRole(blog.getAuthor().getRole())
                 .likeCount(likeService.getLikeCount(blog.getId()))
                 .isLikedByCurrentUser(isLiked)
                 .isSavedByCurrentUser(isSaved)
+                .commentCount(commentService.getCommentCount(blog.getId()))
                 .build();
     }
     
