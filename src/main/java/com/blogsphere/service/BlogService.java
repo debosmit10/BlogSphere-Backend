@@ -1,9 +1,11 @@
 package com.blogsphere.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +71,7 @@ public class BlogService {
     }
 
     public List<BlogResponse> getAllBlogs(String currentUsername) {
-        return blogRepository.findAll().stream()
+        return blogRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
         		.map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }
@@ -86,7 +88,7 @@ public class BlogService {
     public List<BlogResponse> getBlogsByUserId(Long userId, String currentUsername) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        List<Blog> blogs = blogRepository.findByAuthor(user);
+        List<Blog> blogs = blogRepository.findByAuthorOrderByCreatedAtDesc(user);
         return blogs.stream()
                 .map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
@@ -183,6 +185,7 @@ public class BlogService {
 
         return followingUsers.stream()
                 .flatMap(followedUser -> blogRepository.findByAuthor(followedUser).stream())
+                .sorted(Comparator.comparing(Blog::getCreatedAt).reversed())
                 .map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }

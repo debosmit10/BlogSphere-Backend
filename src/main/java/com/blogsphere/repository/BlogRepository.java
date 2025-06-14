@@ -16,6 +16,7 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 	List<Blog> findByAuthorId(Long authorId);
 	List<Blog> findByTopic(Topic topic);
 	List<Blog> findByAuthor(User author);
+	List<Blog> findByAuthorOrderByCreatedAtDesc(User author);
 	long countByCreatedAtAfter(java.time.LocalDateTime dateTime);
 	
 	@Query("SELECT b FROM Blog b LEFT JOIN b.likes l WHERE b.createdAt >= :startDate GROUP BY b ORDER BY COUNT(l) DESC")
