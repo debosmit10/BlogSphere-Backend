@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.blogsphere</groupId>
 	<artifactId>blogsphere</artifactId>
-	<version>1.9.1</version>
+	<version>1.10.0</version>
 	<name>blogsphere</name>
 	<description>The backend for BlogSphere Website</description>
 	<url/>

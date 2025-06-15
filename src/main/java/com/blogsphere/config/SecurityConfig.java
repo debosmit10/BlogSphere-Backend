@@ -63,7 +63,8 @@ public class SecurityConfig {
                 		"/api/comments/blogs/*/users/**", // Create comment
                         "/api/comments/*/users/**", // Delete comment
                         "/api/comment-likes/*/users/**", // Toggle comment like
-                        "/api/follows/{followerId}/following/{followingId}" // Toggle follow
+                        "/api/follows/{followerId}/following/{followingId}", // Toggle follow
+                        "/api/ai/**" // AI endpoints
                 ).authenticated()
                 
                 // Admin endpoints
