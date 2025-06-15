@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -123,8 +124,12 @@ public class BlogService {
     public void deleteBlog(Long id, UserDetails userDetails) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog not found with id: " + id));
-
-        if (!blog.getAuthor().getUsername().equals(userDetails.getUsername())) {
+        
+        // Check if the user is the author of the blog or has ADMIN role
+        boolean isAdmin = userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        boolean isAuthor = blog.getAuthor().getUsername().equals(userDetails.getUsername());
+        
+        if (!isAdmin && !isAuthor) {
             throw new RuntimeException("You are not authorized to delete this blog");
         }
         

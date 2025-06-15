@@ -55,6 +55,12 @@ public class Blog {
 	@OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 	
+	@OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<VisitedBlog> visitedBlogs = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<SavedBlog> savedBlogs = new ArrayList<>();
+	
 	// Helper method to get like count
     public int getLikeCount() {
         return likes.size();
