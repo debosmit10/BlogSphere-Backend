@@ -1,7 +1,5 @@
 package com.blogsphere.dto;
 
-import com.blogsphere.model.Role;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserProfileResponse {
-	private Long id;
-    private String name;
-    private String username;
+public class ResetPasswordRequest {
     private String email;
-    private String profilePictureUrl;
-    private Role role;
+    private String newPassword;
+    private String confirmPassword;
 }
