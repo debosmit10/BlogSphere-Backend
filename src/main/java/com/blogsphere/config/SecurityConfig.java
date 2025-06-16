@@ -42,6 +42,7 @@ public class SecurityConfig {
             	// Public endpoints
                 .requestMatchers(
                 		"/api/auth/**",          // Authentication endpoints
+                		"/api/v1/auth/**",		 // Forgot password
                         "/api/blogs",            // Get all blogs
                         "/api/blogs/{id}",       // Get single blog
                         "/api/blogs/user/**",     // Get user's blogs
