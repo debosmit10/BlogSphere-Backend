@@ -41,6 +41,7 @@ public class AuthenticationService {
             .email(request.getEmail())
             .password(passwordEncoder.encode(request.getPassword()))
             .role(Role.ROLE_USER)
+            // profilePictureUrl will automatically be "default.jpg"
             .build();
         
         userRepository.save(user);
@@ -76,6 +77,7 @@ public class AuthenticationService {
             .name(user.getName())
             .email(user.getEmail())
             .role(user.getRole())
+            .profilePictureUrl(user.getProfilePictureUrl())
             .build();
     }
 }

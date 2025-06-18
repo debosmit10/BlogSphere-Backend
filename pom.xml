@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.blogsphere</groupId>
 	<artifactId>blogsphere</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>1.11.0</version>
 	<name>blogsphere</name>
 	<description>The backend for BlogSphere Website</description>
 	<url/>
@@ -85,6 +85,15 @@
 		    <artifactId>jjwt-jackson</artifactId>
 		    <version>0.12.6</version>
 		    <scope>runtime</scope>
+		</dependency>
+		<dependency>
+    		<groupId>jakarta.validation</groupId>
+    		<artifactId>jakarta.validation-api</artifactId>
+    		<version>3.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 	</dependencies>
 

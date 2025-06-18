@@ -12,6 +12,8 @@ target/
 .settings
 .springBeans
 .sts4-cache
+# User generated --
+/uploads/
 
 ### IntelliJ IDEA ###
 .idea
