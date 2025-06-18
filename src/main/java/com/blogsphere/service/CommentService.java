@@ -67,6 +67,11 @@ public class CommentService {
     }
 
     // Add other methods as needed, e.g., updateComment
+    public int getCommentCount(Long blogId) {
+    	Blog blog = blogRepository.findById(blogId)
+    			.orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
+    	return commentRepository.countByBlog(blog);
+    }
 }
 
 

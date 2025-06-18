@@ -55,6 +55,12 @@ public class Blog {
 	@OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 	
+	@OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<VisitedBlog> visitedBlogs = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<SavedBlog> savedBlogs = new ArrayList<>();
+	
 	// Helper method to get like count
     public int getLikeCount() {
         return likes.size();
@@ -64,10 +70,11 @@ public class Blog {
     public boolean isLikedByUser(User user) {
         return likes.stream().anyMatch(like -> like.getUser().equals(user));
     }
-	
-//	@OneToMany(mappedBy = "post")
-//    private List<Comment> comments;
     
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+    
+    public int getCommentCount() {
+    	return comments.size();
+    }
 }

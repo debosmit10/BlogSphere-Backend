@@ -23,7 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.blogsphere.dto.BlogRequest;
 import com.blogsphere.dto.BlogResponse;
 import com.blogsphere.model.Topic;
+import com.blogsphere.model.User;
+import com.blogsphere.repository.UserRepository;
 import com.blogsphere.service.BlogService;
+import com.blogsphere.service.VisitedBlogService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +37,8 @@ import lombok.RequiredArgsConstructor;
 public class BlogController {
 
     private final BlogService blogService;
+    private final VisitedBlogService visitedBlogService;
+    private final UserRepository userRepository;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createBlog(
@@ -63,7 +68,14 @@ public class BlogController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
-        return ResponseEntity.ok(blogService.getBlogById(id, username));
+        BlogResponse blogResponse = blogService.getBlogById(id, username);
+        if (userDetails != null) {
+            User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+            if (currentUser != null) {
+                visitedBlogService.recordVisitedBlog(currentUser.getId(), id);
+            }
+        }
+        return ResponseEntity.ok(blogResponse);
     }
 
     @GetMapping
@@ -130,5 +142,23 @@ public class BlogController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
         return ResponseEntity.ok(blogService.getBlogsFromFollowedUsers(username));
+    }
+
+    @GetMapping("/top-liked-weekly")
+    public ResponseEntity<List<BlogResponse>> getTopLikedBlogsOfWeek(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        return ResponseEntity.ok(blogService.getTopLikedBlogsOfWeek(username));
+    }
+
+    @GetMapping("/recently-visited")
+    public ResponseEntity<List<BlogResponse>> getRecentlyVisitedBlogs(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        User currentUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(blogService.getRecentlyVisitedBlogs(currentUser.getId(), userDetails.getUsername()));
     }
 }

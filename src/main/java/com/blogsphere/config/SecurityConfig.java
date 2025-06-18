@@ -42,6 +42,7 @@ public class SecurityConfig {
             	// Public endpoints
                 .requestMatchers(
                 		"/api/auth/**",          // Authentication endpoints
+                		"/api/v1/auth/**",		 // Forgot password
                         "/api/blogs",            // Get all blogs
                         "/api/blogs/{id}",       // Get single blog
                         "/api/blogs/user/**",     // Get user's blogs
@@ -63,7 +64,8 @@ public class SecurityConfig {
                 		"/api/comments/blogs/*/users/**", // Create comment
                         "/api/comments/*/users/**", // Delete comment
                         "/api/comment-likes/*/users/**", // Toggle comment like
-                        "/api/follows/{followerId}/following/{followingId}" // Toggle follow
+                        "/api/follows/{followerId}/following/{followingId}", // Toggle follow
+                        "/api/ai/**" // AI endpoints
                 ).authenticated()
                 
                 // Admin endpoints

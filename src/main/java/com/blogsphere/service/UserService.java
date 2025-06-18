@@ -1,5 +1,6 @@
 package com.blogsphere.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
  private final UserRepository userRepository;
  private final FileStorageService fileStorageService;
+ private final PasswordEncoder passwordEncoder;
 
  public UserProfileResponse getUserProfile(Long userId) {
 	    User user = userRepository.findById(userId)
@@ -52,6 +54,18 @@ public class UserService {
      User updatedUser = userRepository.save(user);
      return mapToProfileResponse(updatedUser);
  }
+ 
+ public User findByEmail(String email) {
+     return userRepository.findByEmail(email)
+             .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+ }
+
+ public void updatePassword(String email, String newPassword) {
+     User user = userRepository.findByEmail(email)
+             .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+     user.setPassword(passwordEncoder.encode(newPassword));
+     userRepository.save(user);
+ }
 
  private UserProfileResponse mapToProfileResponse(User user) {
      return UserProfileResponse.builder()
@@ -61,8 +75,6 @@ public class UserService {
              .email(user.getEmail())
              .profilePictureUrl(user.getProfilePictureUrl())
              .role(user.getRole())
-             .followers(0) // Placeholder for now
-             .following(0) // Placeholder for now
              .build();
  }
 }

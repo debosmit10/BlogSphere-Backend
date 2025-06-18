@@ -1,9 +1,12 @@
 package com.blogsphere.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +32,8 @@ public class BlogService {
     private final LikeService likeService;
     private final SavedBlogRepository savedBlogRepository;
     private final FollowService followService;
+    private final VisitedBlogService visitedBlogService;
+    private final CommentService commentService;
 
     public BlogResponse createBlog(BlogRequest request, String username) {
         User author = userRepository.findByUsername(username)
@@ -67,7 +72,7 @@ public class BlogService {
     }
 
     public List<BlogResponse> getAllBlogs(String currentUsername) {
-        return blogRepository.findAll().stream()
+        return blogRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
         		.map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
     }
@@ -84,7 +89,7 @@ public class BlogService {
     public List<BlogResponse> getBlogsByUserId(Long userId, String currentUsername) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        List<Blog> blogs = blogRepository.findByAuthor(user);
+        List<Blog> blogs = blogRepository.findByAuthorOrderByCreatedAtDesc(user);
         return blogs.stream()
                 .map(blog -> mapToBlogResponse(blog, currentUsername))
                 .collect(Collectors.toList());
@@ -119,8 +124,12 @@ public class BlogService {
     public void deleteBlog(Long id, UserDetails userDetails) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog not found with id: " + id));
-
-        if (!blog.getAuthor().getUsername().equals(userDetails.getUsername())) {
+        
+        // Check if the user is the author of the blog or has ADMIN role
+        boolean isAdmin = userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        boolean isAuthor = blog.getAuthor().getUsername().equals(userDetails.getUsername());
+        
+        if (!isAdmin && !isAuthor) {
             throw new RuntimeException("You are not authorized to delete this blog");
         }
         
@@ -159,9 +168,11 @@ public class BlogService {
                 .authorName(blog.getAuthor().getName())
                 .authorUsername(blog.getAuthor().getUsername())
                 .authorProfilePictureUrl(blog.getAuthor().getProfilePictureUrl())
+                .authorRole(blog.getAuthor().getRole())
                 .likeCount(likeService.getLikeCount(blog.getId()))
                 .isLikedByCurrentUser(isLiked)
                 .isSavedByCurrentUser(isSaved)
+                .commentCount(commentService.getCommentCount(blog.getId()))
                 .build();
     }
     
@@ -179,7 +190,22 @@ public class BlogService {
 
         return followingUsers.stream()
                 .flatMap(followedUser -> blogRepository.findByAuthor(followedUser).stream())
+                .sorted(Comparator.comparing(Blog::getCreatedAt).reversed())
                 .map(blog -> mapToBlogResponse(blog, currentUsername))
+                .collect(Collectors.toList());
+    }
+
+    public List<BlogResponse> getTopLikedBlogsOfWeek(String currentUsername) {
+    	LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        return blogRepository.findTopBlogsByLikes(sevenDaysAgo, org.springframework.data.domain.PageRequest.of(0, 3)).stream()
+                .map(blog -> mapToBlogResponse(blog, currentUsername))
+                .collect(Collectors.toList());
+    }
+  
+    public List<BlogResponse> getRecentlyVisitedBlogs(Long userId, String currentUsername) {
+        return visitedBlogService.getRecentlyVisitedBlogs(userId).stream()
+                .limit(3)
+                .map(visitedBlog -> mapToBlogResponse(visitedBlog.getBlog(), currentUsername))
                 .collect(Collectors.toList());
     }
 }
