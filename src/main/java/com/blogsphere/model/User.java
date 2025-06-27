@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -49,8 +50,14 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
-	@OneToMany(mappedBy = "author")
+	@OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Blog> blogs;
+	
+	@OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Follow> followingUsers;
+
+	@OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Follow> followers;
 	
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 	    return List.of(new SimpleGrantedAuthority(role.name()));
